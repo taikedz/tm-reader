@@ -10,7 +10,7 @@ addline() { echo "$*" >> "$indexf"; }
 addline '<html><head><title>Tux Machines Sumaries</title>'
 addline '<link rel="stylesheet" href="/tuxmachines.css"></head><body>'
 
-addline '<p class="logo-title"><a href="https://news.tuxmachines.org/"><img src="https://news.tuxmachines.org/Images/tuxmachines.logo.svg"></a></p>'
+addline '<p class="logo-title"><a href="https://news.tuxmachines.org/" target="_blank"><img src="https://news.tuxmachines.org/Images/tuxmachines.logo.svg"></a></p>'
 addline '<h1>Tux Machines Views</h1>'
 
 for page in web/htdocs/*.html; do
