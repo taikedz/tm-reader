@@ -1,0 +1,9 @@
+services:
+  webserver:
+    image: nginx
+    volumes:
+    - ./htdocs:/usr/share/nginx/html
+    - ./nginx.conf.d:/etc/nginx/conf.d
+    ports:
+    - 8080:80
+
