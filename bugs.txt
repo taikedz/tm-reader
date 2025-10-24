@@ -1,5 +1,9 @@
+# Dupes
+
 When processing programming pages with further "sections", first article gets duplicated somehow
 
  https://news.tuxmachines.org/n/2025/10/22/Programming_Leftovers.shtml
 
-Andoird Leftovers and Today in Techrights each need a custom exploder
+# Timestamp
+
+things like dates are not being retained, can they be retained for sub-articles?
