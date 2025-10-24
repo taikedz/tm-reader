@@ -2,8 +2,6 @@ from xml.dom import minidom
 from bs4 import BeautifulSoup as soup4
 from urllib.request import urlopen
 
-MAIN_FEED_URL="https://news.tuxmachines.org/feed.xml"
-
 class Elem:
     def __init__(self, dom):
         self._dom = dom
@@ -12,8 +10,8 @@ class Elem:
             setattr(self, node.localName.capitalize(), getNodeText(node))
 
 
-def do_ingest():
-    main_rss = minidom.parse(urlopen(MAIN_FEED_URL))
+def do_ingest(url:str):
+    main_rss = minidom.parse(urlopen(url))
     articles = []
     for elem in dom_tagpath(main_rss, "rss/channel").childNodes:
         if elem.localName == "item":

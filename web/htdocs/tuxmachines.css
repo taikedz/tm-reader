@@ -6,9 +6,21 @@ body {
     padding-right: 10%
     */
 }
-li.pagelink {
+
+h1 {
+    color: #7b7;
+}
+.pagelink {
     font: 24pt sans-serif;
 }
+.logo-title {
+    float: left;
+}
+.logo-title img {
+    width: 40pt;
+    padding: 7pt;
+}
+
 .gendate {
     color: #676;
 }
@@ -35,6 +47,11 @@ a:visited {
 }
 .article .description {
     font: 10pt sans-serif;
-    color: #999;
+    color: #bbb;
     /*padding-left: 15pt;*/
+}
+
+.styleicon {
+    float: right;
+    clear: both;
 }

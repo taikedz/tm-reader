@@ -7,6 +7,10 @@ import json
 import ingest
 import htmlgen
 
+
+
+MAIN_FEED_URL="https://news.tuxmachines.org/feed.xml"
+
 def filter_select(articles, filter_list):
     filter_list = [f.lower() for f in filter_list]
     retained_articles = []
@@ -15,14 +19,15 @@ def filter_select(articles, filter_list):
         title, _, description = e
         lo_t = title.lower()
         lo_d = description.lower()
-        retain = True
+        retain = False
 
-        for findtext in filter_list:
-            if not ( findtext in lo_t or findtext in lo_d ):
-                retain = False
-                break
-        if not retain:
-            continue
+        if filter_list:
+            for findtext in filter_list:
+                if findtext in lo_t or findtext in lo_d:
+                    retain = True
+                    break
+            if not retain:
+                continue
 
         if not e in retained_articles:
             # FIXME - this is a shim to remove duplicates
@@ -54,7 +59,11 @@ def parse_args():
     parser.add_argument("--save", "-o", help="Save as JSON")
     parser.add_argument("--load", "-l", help="Load from JSON instead of Web")
     parser.add_argument("filters", nargs="*", help="CLI filters - match articles containing term in title or description")
-    return parser.parse_args()
+
+    args = parser.parse_args()
+    assert args.save or args.html or args.cli, "Specify -o, -c or -t to generate output. Specify -h for help."
+
+    return args
 
 
 def load_articles(filepath):
@@ -70,21 +79,17 @@ def save_articles(articles, filepath):
 def main():
     args = parse_args()
     try:
-        assert args.save or args.html or args.cli, "Specify -o, -c or -t to generate output. Specify -h for help."
-
         if args.load:
             articles = load_articles(args.load)
         else:
-            articles = ingest.do_ingest()
+            articles = ingest.do_ingest(MAIN_FEED_URL)
             articles = ingest.expand(articles)
 
         if args.save:
             save_articles(articles, args.save)
 
         articles = filter_select(articles, args.filters)
-        filter_name = ""
-        if args.filters:
-            filter_name = f": {', '.join(args.filters)}"
+        filter_name = f": {', '.join(args.filters)}" if args.filters else ""
 
         if args.html:
             with open(args.html, 'w') as fh:
@@ -95,8 +100,10 @@ def main():
                     fh.write(blob)
 
                 fh.write(htmlgen.FOOTER)
+
         if args.cli:
             cli_summary(articles)
+
     except AssertionError as e:
         print(e)
         exit(1)
