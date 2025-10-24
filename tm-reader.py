@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 from xml.dom import minidom
 from bs4 import BeautifulSoup as soup4
