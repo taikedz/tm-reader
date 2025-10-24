@@ -1,4 +1,6 @@
+import sys
 from xml.dom import minidom
+from bs4 import BeautifulSoup as soup4
 from urllib.request import urlopen
 
 MAIN_FEED_URL="https://news.tuxmachines.org/feed.xml"
@@ -10,12 +12,14 @@ class Elem:
             if isinstance(node, minidom.Text): continue
             setattr(self, node.localName.capitalize(), getNodeText(node))
 
+
 def do_ingest():
     main_rss = minidom.parse(urlopen(MAIN_FEED_URL))
     articles = []
     for elem in dom_tagpath(main_rss, "rss/channel").childNodes:
         if elem.localName == "item":
-            articles.append(Elem(elem))
+            el = Elem(elem)
+            articles.append((el.Title, el.Link, el.Description))
     return articles
 
 def getNodeText(mainnode):
@@ -46,39 +50,78 @@ def dom_tagpath(dom, path):
 
 
 def explode(elem):
-    return [elem]
+    section, top_link, _ = elem
     sub_articles = []
 
-    pagedom = minidom.parse(urlopen(elem.Link))
-    list_items = [li.parentNode for li in pagedom.getElementByTagname("blockquote")]
-    print(list_items)
-    exit()
+    page = soup4(urlopen(top_link), 'html.parser')
+    list_items = [li for li in page.find_all("li") if li.find("blockquote")]
+    for top in list_items:
+        source = top.find("em")
+        a_elem = top.find("a")
+        quote = top.find("blockquote")
 
-def expand(articles:list[Elem]):
+        if None in [source, a_elem, quote]:
+            continue
+
+        link = a_elem['href']
+        title = f"{section} / {source.text} : {a_elem.text}"
+        description = '\n'.join([p.text for p in quote.find_all("p")])
+        
+        sub_articles.append((title, link, description))
+    return sub_articles
+
+def expand(articles:list[tuple[str,str,str]]):
     new_list = []
     for elem in articles:
-        if not elem.Title.lower() in ["security leftovers", "today's howtos", "programming leftovers"]:
-            continue # retain a reduced set for dev FIXME remove this
-        if elem.Title == "Security Leftovers":
-            new_list.extend(explode(elem))
+        title,link,description = elem
+
+        if title.lower() in ["security leftovers", "today's howtos", "programming leftovers"]:
+            # these share the same page format
+            items = explode(elem)
+            assert len(items), f"Section {title} found no articles! Page format change? // {link}"
+            new_list.extend(items)
+        elif title.lower() in ["android leftovers", "today in techrights"]:
+            # these two have their own distinct formats
+            # there's no consistency!
+            new_list.append(elem)
         else:
             new_list.append(elem)
     return new_list
 
 
-def cli_summary(elems):
+def cli_summary(elems, findtext_list):
+    count = 0
+    findtext_list = [f.lower() for f in findtext_list]
+
     for e in elems:
-        print(f"""{e.Title}
-        {e.Description}
-        {e.Link}
+        title, link, description = e
+        lo_t = title.lower()
+        lo_d = description.lower()
+        retain = True
+
+        for findtext in findtext_list:
+            if not ( findtext in lo_t or findtext in lo_d ):
+                retain = False
+                break
+        if not retain:
+            continue
+
+        count += 1
+
+        print(f"""{title}
+        {link}
+        {description}
         """)
+        print("===")
+    print(f"--> {count} articles.")
 
 
 def main():
     try:
+        findtext = None
         articles = do_ingest()
         articles = expand(articles)
-        cli_summary(articles)
+        cli_summary(articles, sys.argv[1:])
     except AssertionError as e:
         print(e)
         exit(1)
