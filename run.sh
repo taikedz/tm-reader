@@ -1,4 +1,4 @@
-set euo pipefail
+set -euo pipefail
 
 HEREDIR="$(dirname "$(realpath "$0")")"
 
