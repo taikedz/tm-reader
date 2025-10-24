@@ -8,3 +8,5 @@ mkdir -p web
 ./run.sh -l web/articles-today.json -t web/security.html security
 ./run.sh -l web/articles-today.json -t web/golang.html golang
 ./run.sh -l web/articles-today.json -t web/programming.html "programming leftovers"
+
+bash create-index.sh

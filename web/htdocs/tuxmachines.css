@@ -6,6 +6,9 @@ body {
     padding-right: 10%
     */
 }
+li.pagelink {
+    font: 24pt sans-serif;
+}
 .gendate {
     color: #676;
 }
