@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
 import json
 
 import ingest
@@ -88,8 +89,11 @@ def main():
         if args.html:
             with open(args.html, 'w') as fh:
                 fh.write(htmlgen.HEADER.format(filter_name=filter_name))
+                fh.write(f'<p class="gendate">Generated on {datetime.datetime.now()}</p>')
+
                 for blob in htmlgen.html_summary_gen(articles):
                     fh.write(blob)
+
                 fh.write(htmlgen.FOOTER)
         if args.cli:
             cli_summary(articles)

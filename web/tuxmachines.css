@@ -1,19 +1,32 @@
 
 body {
     background-color: #444;
+    /*
     padding-left: 10%;
     padding-right: 10%
+    */
+}
+.gendate {
+    color: #676;
 }
 .article {
     border: 1px solid #333;
     margin: 2pt;
-    padding: 2pt;
+    padding: 12pt;
+
+    width: 300pt;
+    height: 340pt;
+
+    float: left;
 }
 .article .title {
     font: 14pt serif;
 }
-a {
+a:link {
     color: #77f;
+}
+a:visited {
+    color: #55d;
 }
 .article .description {
     font: 11pt sans-serif;
