@@ -1,112 +1,40 @@
 #!/usr/bin/env python3
 
-import sys
-from xml.dom import minidom
-from bs4 import BeautifulSoup as soup4
-from urllib.request import urlopen
+import argparse
+import json
 
-MAIN_FEED_URL="https://news.tuxmachines.org/feed.xml"
+import ingest
+import htmlgen
 
-class Elem:
-    def __init__(self, dom):
-        self._dom = dom
-        for node in dom.childNodes:
-            if isinstance(node, minidom.Text): continue
-            setattr(self, node.localName.capitalize(), getNodeText(node))
+def filter_select(articles, filter_list):
+    filter_list = [f.lower() for f in filter_list]
+    retained_articles = []
 
-
-def do_ingest():
-    main_rss = minidom.parse(urlopen(MAIN_FEED_URL))
-    articles = []
-    for elem in dom_tagpath(main_rss, "rss/channel").childNodes:
-        if elem.localName == "item":
-            el = Elem(elem)
-            articles.append((el.Title, el.Link, el.Description))
-    return articles
-
-def getNodeText(mainnode):
-    # Iterate all Nodes aggregate TEXT_NODE
-    nodelist = mainnode.childNodes
-    rc = []
-    for node in nodelist:
-        if node.nodeType == node.TEXT_NODE:
-            rc.append(node.data)
-        else:
-            # Recursive
-            rc.append(getText(node))
-    return ''.join(rc)
-
-def dom_tagpath(dom, path):
-    tags = path.split("/")
-    found = False
-
-    for tag in tags:
-        if tag == "": continue
-        found = False
-        for node in dom.childNodes:
-            if node.localName == tag:
-                dom = node
-                found = True
-                break
-    return dom if found else None
-
-
-def explode(elem):
-    section, top_link, _ = elem
-    sub_articles = []
-
-    page = soup4(urlopen(top_link), 'html.parser')
-    list_items = [li for li in page.find_all("li") if li.find("blockquote")]
-    for top in list_items:
-        source = top.find("em")
-        a_elem = top.find("a")
-        quote = top.find("blockquote")
-
-        if None in [source, a_elem, quote]:
-            continue
-
-        link = a_elem['href']
-        title = f"{section} / {source.text} : {a_elem.text}"
-        description = '\n'.join([p.text for p in quote.find_all("p")])
-        
-        sub_articles.append((title, link, description))
-    return sub_articles
-
-def expand(articles:list[tuple[str,str,str]]):
-    new_list = []
-    for elem in articles:
-        title,link,description = elem
-
-        if title.lower() in ["security leftovers", "today's howtos", "programming leftovers"]:
-            # these share the same page format
-            items = explode(elem)
-            assert len(items), f"Section {title} found no articles! Page format change? // {link}"
-            new_list.extend(items)
-        elif title.lower() in ["android leftovers", "today in techrights"]:
-            # these two have their own distinct formats
-            # there's no consistency!
-            new_list.append(elem)
-        else:
-            new_list.append(elem)
-    return new_list
-
-
-def cli_summary(elems, findtext_list):
-    count = 0
-    findtext_list = [f.lower() for f in findtext_list]
-
-    for e in elems:
-        title, link, description = e
+    for e in articles:
+        title, _, description = e
         lo_t = title.lower()
         lo_d = description.lower()
         retain = True
 
-        for findtext in findtext_list:
+        for findtext in filter_list:
             if not ( findtext in lo_t or findtext in lo_d ):
                 retain = False
                 break
         if not retain:
             continue
+
+        if not e in retained_articles:
+            # FIXME - this is a shim to remove duplicates
+            # but duplicates should not be appearing in the first place
+            retained_articles.append(e)
+    return retained_articles
+
+
+def cli_summary(articles):
+    count = 0
+
+    for e in articles:
+        title, link, description = e
 
         count += 1
 
@@ -118,12 +46,53 @@ def cli_summary(elems, findtext_list):
     print(f"--> {count} articles.")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--html", "-t", help="Generate HTML into given file", default=None)
+    parser.add_argument("--cli", "-c", help="Generate CLI output", action="store_true")
+    parser.add_argument("--save", "-o", help="Save as JSON")
+    parser.add_argument("--load", "-l", help="Load from JSON instead of Web")
+    parser.add_argument("filters", nargs="*", help="CLI filters - match articles containing term in title or description")
+    return parser.parse_args()
+
+
+def load_articles(filepath):
+    with open(filepath) as fh:
+        return json.load(fh)
+
+
+def save_articles(articles, filepath):
+    with open(filepath, 'w') as fh:
+        json.dump(articles, fh)
+
+
 def main():
+    args = parse_args()
     try:
-        findtext = None
-        articles = do_ingest()
-        articles = expand(articles)
-        cli_summary(articles, sys.argv[1:])
+        assert args.save or args.html or args.cli, "Specify -o, -c or -t to generate output. Specify -h for help."
+
+        if args.load:
+            articles = load_articles(args.load)
+        else:
+            articles = ingest.do_ingest()
+            articles = ingest.expand(articles)
+
+        if args.save:
+            save_articles(articles, args.save)
+
+        articles = filter_select(articles, args.filters)
+        filter_name = ""
+        if args.filters:
+            filter_name = f": {', '.join(args.filters)}"
+
+        if args.html:
+            with open(args.html, 'w') as fh:
+                fh.write(htmlgen.HEADER.format(filter_name=filter_name))
+                for blob in htmlgen.html_summary_gen(articles):
+                    fh.write(blob)
+                fh.write(htmlgen.FOOTER)
+        if args.cli:
+            cli_summary(articles)
     except AssertionError as e:
         print(e)
         exit(1)

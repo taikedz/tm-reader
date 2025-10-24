@@ -1,7 +1,5 @@
 RSS output
 
-Nice webpage HTML output, with CSS
-
 Custom exploders needed:
 	Android Leftovers
 	Today in Techrights

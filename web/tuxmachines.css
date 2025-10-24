@@ -1,0 +1,22 @@
+
+body {
+    background-color: #444;
+    padding-left: 10%;
+    padding-right: 10%
+}
+.article {
+    border: 1px solid #333;
+    margin: 2pt;
+    padding: 2pt;
+}
+.article .title {
+    font: 14pt serif;
+}
+a {
+    color: #77f;
+}
+.article .description {
+    font: 11pt sans-serif;
+    color: #bbb;
+    padding-left: 40pt;
+}

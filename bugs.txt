@@ -1,5 +1,7 @@
 # Dupes
 
+(mitigated, not fixed)
+
 When processing programming pages with further "sections", first article gets duplicated somehow
 
  https://news.tuxmachines.org/n/2025/10/22/Programming_Leftovers.shtml
