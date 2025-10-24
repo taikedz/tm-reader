@@ -1,6 +1,6 @@
 
 body {
-    background-color: #444;
+    background-color: #222;
     /*
     padding-left: 10%;
     padding-right: 10%
@@ -17,22 +17,24 @@ li.pagelink {
     margin: 2pt;
     padding: 12pt;
 
-    width: 300pt;
-    height: 340pt;
+    width: 200pt;
+    height: 220pt;
 
     float: left;
+    overflow-y: auto;
 }
 .article .title {
-    font: 14pt serif;
+    font: 12pt sans-serif;
 }
 a:link {
     color: #77f;
+    text-decoration: none;
 }
 a:visited {
     color: #55d;
 }
 .article .description {
-    font: 11pt sans-serif;
-    color: #bbb;
-    padding-left: 40pt;
+    font: 10pt sans-serif;
+    color: #999;
+    /*padding-left: 15pt;*/
 }
