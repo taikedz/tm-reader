@@ -13,7 +13,7 @@ addline '<ul>'
 
 for page in web/htdocs/*.html; do
     shortname="$(grep -P "<title>Tux Machines : .+</title>" "$page"|sed -r -e 's/^.+?Machines : //' -e 's|</title>||')"
-    addline "<li class="pagelink"><a href=\"$(basename "$page")\">$shortname</a></li>"
+    addline "<li class="pagelink"><a href=\"$(basename "$page")\">${shortname:-All}</a></li>"
 done
 
 addline "</ul></body></html>"

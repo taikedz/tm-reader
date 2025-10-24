@@ -31,7 +31,7 @@ def getNodeText(mainnode):
         else:
             # ! Recursive
             rc.append(getNodeText(node))
-    return ''.join(rc)
+    return '<br/>'.join(rc)
 
 def dom_tagpath(dom, path):
     tags = path.split("/")
