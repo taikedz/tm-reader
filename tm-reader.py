@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import json
+import re
 
 import ingest
 import htmlgen
@@ -12,7 +13,6 @@ import htmlgen
 MAIN_FEED_URL="https://news.tuxmachines.org/feed.xml"
 
 def filter_select(articles, filter_list):
-    filter_list = [f.lower() for f in filter_list]
     retained_articles = []
 
     for e in articles:
@@ -23,9 +23,21 @@ def filter_select(articles, filter_list):
 
         if filter_list:
             for findtext in filter_list:
-                if findtext in lo_t or findtext in lo_d:
-                    retain = True
-                    break
+                if findtext.startswith("="):
+                    findtext = findtext[1:]
+                    if findtext in title or findtext in description:
+                        retain = True
+                        break
+                elif findtext.startswith("~"):
+                    findtext = findtext[1:]
+                    if re.findall(findtext, title) or re.findall(findtext, description):
+                        retain = True
+                        break
+                else:
+                    findtext = findtext.lower()
+                    if findtext in lo_t or findtext in lo_d:
+                        retain = True
+                        break
             if not retain:
                 continue
 
@@ -58,7 +70,7 @@ def parse_args():
     parser.add_argument("--cli", "-c", help="Generate CLI output", action="store_true")
     parser.add_argument("--save", "-o", help="Save as JSON")
     parser.add_argument("--load", "-l", help="Load from JSON instead of Web")
-    parser.add_argument("filters", nargs="*", help="CLI filters - match articles containing term in title or description")
+    parser.add_argument("filters", nargs="*", help="CLI filters - match articles containing term in title or description (case insensitive). Prefix with '=' for case-sensitive. Prefix with '~' for a regex")
 
     args = parser.parse_args()
     assert args.save or args.html or args.cli, "Specify -o, -c or -t to generate output. Specify -h for help."
