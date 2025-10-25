@@ -5,3 +5,5 @@ Custom exploders needed:
 	Today in Techrights
 
 Fetch and analyse: fetch each page from RSS and determine whether it needs exploding, and using which exploder
+
+In web view, add a way to retain items?
