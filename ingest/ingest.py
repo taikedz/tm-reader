@@ -16,7 +16,7 @@ def do_ingest(url:str):
     for elem in dom_tagpath(main_rss, "rss/channel").childNodes:
         if elem.localName == "item":
             el = Elem(elem)
-            articles.append((el.Title, el.Link, el.Description))
+            articles.append((el.Title, el.Link, el.Description, el.Pubdate))
     return articles
 
 def getNodeText(mainnode):
@@ -47,7 +47,7 @@ def dom_tagpath(dom, path):
 
 
 def explode(elem):
-    section, top_link, _ = elem
+    section, top_link, _, pubdate = elem
     sub_articles = []
 
     page = soup4(urlopen(top_link), 'html.parser')
@@ -64,13 +64,13 @@ def explode(elem):
         title = f"{section} / {source.text} : {a_elem.text}"
         description = '\n'.join([p.text for p in quote.find_all("p")])
         
-        sub_articles.append((title, link, description))
+        sub_articles.append((title, link, description, pubdate))
     return sub_articles
 
-def expand(articles:list[tuple[str,str,str]]):
+def expand(articles:list[tuple[str,str,str,str]]):
     new_list = []
     for elem in articles:
-        title,link,description = elem
+        title,link,description,pubdate = elem
 
         if title.lower() in ["security leftovers", "today's howtos", "programming leftovers"]:
             # these share the same page format
@@ -84,3 +84,4 @@ def expand(articles:list[tuple[str,str,str]]):
         else:
             new_list.append(elem)
     return new_list
+

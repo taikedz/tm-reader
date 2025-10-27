@@ -15,8 +15,8 @@ MAIN_FEED_URL="https://news.tuxmachines.org/feed.xml"
 def filter_select(articles, filter_list):
     retained_articles = []
 
-    for e in articles:
-        title, _, description = e
+    for artic in articles:
+        title, olink, description, pubdate = artic
         lo_t = title.lower()
         lo_d = description.lower()
         retain = False
@@ -41,22 +41,23 @@ def filter_select(articles, filter_list):
             if not retain:
                 continue
 
-        if not e in retained_articles:
+        if not artic in retained_articles:
             # FIXME - this is a shim to remove duplicates
             # but duplicates should not be appearing in the first place
-            retained_articles.append(e)
+            retained_articles.append(artic)
     return retained_articles
 
 
 def cli_summary(articles):
     count = 0
 
-    for e in articles:
-        title, link, description = e
+    for artic in articles:
+        title, link, description, pubdate = artic
 
         count += 1
 
         print(f"""{title}
+        {pubdate}
         {link}
         {description}
         """)

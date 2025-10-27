@@ -10,6 +10,9 @@ body {
 h1 {
     color: #7b7;
 }
+.headlink {
+    font-size: 18pt;
+}
 .pagelink {
     font: 24pt sans-serif;
 }
@@ -23,6 +26,7 @@ h1 {
 
 .gendate {
     color: #676;
+    font: 9pt sans-serif;
 }
 .article {
     border: 1px solid #333;
