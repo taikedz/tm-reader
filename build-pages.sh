@@ -2,9 +2,20 @@
 
 cd "$(dirname "$(realpath "$0")")"
 
+argshave() {
+    term="$1"; shift
+    for item in "$@"; do
+        if [[ "$item" = "$term" ]]; then return 0; fi
+    done
+    return 1
+}
+
 mkdir -p web
 ( set -x
-./run.sh -o web/articles-today.json
+if ! argshave 'no-pull' "$@"; then
+    ./run.sh -o web/articles-today.json
+fi
+
 rm web/htdocs/*.html
 
 # Use a number on the page filename to determine its order inthe index
