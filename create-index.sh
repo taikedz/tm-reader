@@ -7,7 +7,12 @@ indexf="web/htdocs/index.html"
 echo > "$indexf"
 addline() { echo "$*" >> "$indexf"; }
 
-addline '<html><head><title>Tux Machines Sumaries</title>'
+addline '<!doctype html>'
+addline '<html lang="en"><head>'
+addline '<meta charset="utf-8">'
+addline '<meta name="viewport" content="width=device-width,initial-scale=1.0">'
+
+addline '<title>Tux Machines Sumaries</title>'
 addline '<link rel="stylesheet" href="/tuxmachines.css"></head><body>'
 
 addline '<p class="logo-title"><a href="https://news.tuxmachines.org/" target="_blank"><img src="https://news.tuxmachines.org/Images/tuxmachines.logo.svg"></a></p>'
