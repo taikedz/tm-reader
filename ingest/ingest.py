@@ -67,11 +67,11 @@ def explode(elem):
         sub_articles.append((title, link, description, pubdate))
     return sub_articles
 
-def title_has(title, pieces):
+def summary_has(title, description, pieces):
     title = title.lower()
+    description = description.lower()
     for piece in pieces:
-        if piece in title:
-            print(f"Found {repr(piece)} in {repr(title)}")
+        if piece in title or piece in description:
             return True
     return False
 
@@ -80,12 +80,12 @@ def expand(articles:list[tuple[str,str,str,str]]):
     for elem in articles:
         title,link,description,pubdate = elem
 
-        if title_has(title, ["security leftovers", "today's howtos", "programming leftovers"]):
+        if summary_has(title, description, ["security leftovers", "today's howtos", "programming leftovers"]):
             # these share the same page format
             items = explode(elem)
             assert len(items), f"Section {title} found no articles! Page format change? // {link}"
             new_list.extend(items)
-        elif title_has(title, ["android leftovers", "today in techrights"]):
+        elif summary_has(title, description, ["android leftovers", "today in techrights"]):
             # these two have their own distinct formats
             # there's no consistency!
             new_list.append(elem)
